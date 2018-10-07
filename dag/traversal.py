@@ -1,9 +1,11 @@
+from datetime import datetime
 import pkgutil
 import sys
 import attr
+from collections import deque
+
 import luigi
 from luigi.task import flatten
-from collections import deque
 
 from dag.pipeline import HoroscopeReportTask
 
@@ -60,12 +62,10 @@ def df_traversal(task, accum):
 
 
 if __name__ == '__main__':
-    from datetime import datetime
     dag = bf_traversal(
         HoroscopeReportTask(datetime.now())
     )
-    print("BF Traversal")
-    print(len(dag))
+    print("\n\n\n  BF Traversal\n")
     padding = ""
     for x in dag:
         print(padding + x.name + " - " + x.output)
@@ -76,9 +76,7 @@ if __name__ == '__main__':
         HoroscopeReportTask(datetime.now()),
         list()
     )
-    print("")
-    print(" DF Traversal")
-    print(" " + str(len(dag)))
+    print("\n\n\n  DF Traversal\n")
     padding = ""
     for x in dag:
         print(padding + x.name + " - " + x.output)
