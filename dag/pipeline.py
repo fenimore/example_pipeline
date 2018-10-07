@@ -183,41 +183,45 @@ class HoroscopeReportTask(Task):
         logs = []
         with open(self.requires().output().path, "r") as f:
             logs = f.read().strip().split("\n")
-            def map_log(row):
-                zodi, seas, work, horo = row.split(",")
-                is_workday = work == "work"
-                is_weekend = work == "weekend"
-                is_holiday = work == "holiday"
-                return (
-                    horo,  # key
-                    (1 if is_workday else 0,
-                     1 if is_holiday else 0,
-                     1 if is_weekend else 0, 1)  # count
-                )
-            mapped_logs = map(map_log , logs)
-            Row = namedtuple(
-                "Row", ["work", "holiday", "weekend", "total"]
-            )
-            reduced_logs = reduce_by_key(
-                lambda l, r: Row(
-                    work=l[0] +r[0],
-                    holiday=l[1] + r[1],
-                    weekend=l[2] + r[2],
-                    total=l[3] + r[3],
+
+        def map_log(row):
+            zodi, seas, work, horo = row.split(",")
+            is_workday = work == "work"
+            is_weekend = work == "weekend"
+            is_holiday = work == "holiday"
+            return (
+                horo,  # key
+                (
+                    1 if is_workday else 0,
+                    1 if is_holiday else 0,
+                    1 if is_weekend else 0,
+                    1,  # count
                 ),
-                mapped_logs
             )
-            tsv = ["sign\tworking_days\tholidays\tweekend\tall_days"]
-            for row in reduced_logs:
-                tsv.append(
-                    "{}\t{}\t{}\t{}\t{}".format(
-                        row[0],
-                        row[1].work, row[1].holiday,
-                        row[1].weekend, row[1].total,
-                    )
+        mapped_logs = map(map_log , logs)
+        Row = namedtuple(
+            "Row", ["work", "holiday", "weekend", "total"]
+        )
+        reduced_logs = reduce_by_key(
+            lambda l, r: Row(
+                work=l[0] +r[0],
+                holiday=l[1] + r[1],
+                weekend=l[2] + r[2],
+                total=l[3] + r[3],
+            ),
+            mapped_logs
+        )
+        tsv = ["sign\tworking_days\tholidays\tweekends\ttotal_days"]
+        for row in reduced_logs:
+            tsv.append(
+                "{}\t{}\t{}\t{}\t{}".format(
+                    row[0],
+                    row[1].work, row[1].holiday,
+                    row[1].weekend, row[1].total,
                 )
-            with open(self.output().path, 'a') as f:
-                f.write("\n".join(tsv))
+            )
+        with open(self.output().path, 'a') as f:
+            f.write("\n".join(tsv))
 
 
 def reduce_by_key(func, iterable):
