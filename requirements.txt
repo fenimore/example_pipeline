@@ -1,0 +1,9 @@
+# necessary
+attrs==18.2.0
+holidays==0.9.7
+luigi==2.7.8
+
+# useful
+visidata==1.4
+ptpython==0.41
+pudb==2018.1
